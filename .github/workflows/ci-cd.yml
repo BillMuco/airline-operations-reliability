@@ -13,12 +13,12 @@ permissions:
 jobs:
   test:
     name: Unit tests and code checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -36,13 +36,13 @@ jobs:
     name: Deploy bundle to Databricks
     needs: test
     if: ${{ needs.test.result == 'success' && github.ref == 'refs/heads/main' && vars.DATABRICKS_DEPLOY_ENABLED == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install Databricks CLI
         uses: databricks/setup-cli@v1.22.1
       - name: Confirm deployment settings exist
