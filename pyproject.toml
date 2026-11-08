@@ -1,0 +1,15 @@
+[project]
+name = "airline-operations-reliability"
+version = "0.1.0"
+description = "BTS airline operations reliability lakehouse pipeline"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

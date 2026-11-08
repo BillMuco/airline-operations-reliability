@@ -1,0 +1,30 @@
+resources:
+  jobs:
+    airline_reliability_pipeline:
+      name: airline-operations-reliability-${bundle.target}
+      description: >-
+        Repeat-safe BTS monthly ingestion and Bronze, Silver, and Gold table refresh.
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tasks:
+        - task_key: ingest_transform_and_aggregate
+          spark_python_task:
+            python_file: ${workspace.file_path}/src/airline_ops/pipeline.py
+            parameters:
+              - --raw-root
+              - ${var.raw_root}
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
+          environment_key: default
+          max_retries: 1
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+      schedule:
+        quartz_cron_expression: "0 0 3 2 * ?"
+        timezone_id: Africa/Johannesburg
+        pause_status: PAUSED

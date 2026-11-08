@@ -1,0 +1,25 @@
+bundle:
+  name: airline_operations_reliability
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog name for project tables
+    default: workspace
+  schema:
+    description: Project schema name
+    default: airline_ops
+  raw_root:
+    description: Volume folder containing source_month=YYYY-MM/flights.csv folders
+    default: /Volumes/workspace/airline_ops/raw_files/bts/on_time
+
+workspace:
+  host: ${env.DATABRICKS_HOST}
+  root_path: ~/.bundle/${bundle.name}/${bundle.target}
+
+targets:
+  dev:
+    default: true
+    mode: development

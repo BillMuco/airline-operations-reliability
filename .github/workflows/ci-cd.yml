@@ -1,0 +1,56 @@
+name: CI and Databricks CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests and code checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install checks
+        run: python -m pip install -r requirements-dev.txt
+      - name: Check formatting and lint
+        run: |
+          ruff check src tests
+          ruff format --check src tests
+      - name: Run unit tests
+        run: pytest -q
+
+  deploy:
+    name: Deploy bundle to Databricks
+    needs: test
+    if: ${{ needs.test.result == 'success' && github.ref == 'refs/heads/main' && vars.DATABRICKS_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@v1.22.1
+      - name: Confirm deployment settings exist
+        shell: bash
+        run: |
+          test -n "$DATABRICKS_HOST" || { echo "Set the DATABRICKS_HOST repository variable."; exit 1; }
+          test -n "$DATABRICKS_TOKEN" || { echo "Set the DATABRICKS_TOKEN repository secret."; exit 1; }
+      - name: Validate Databricks bundle
+        run: databricks bundle validate --target dev
+      - name: Deploy job and source files
+        run: databricks bundle deploy --target dev
