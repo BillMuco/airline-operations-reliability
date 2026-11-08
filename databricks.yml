@@ -16,7 +16,6 @@ variables:
     default: /Volumes/workspace/airline_ops/raw_files/bts/on_time
 
 workspace:
-  host: ${env.DATABRICKS_HOST}
   root_path: ~/.bundle/${bundle.name}/${bundle.target}
 
 targets:
